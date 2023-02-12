@@ -2,32 +2,33 @@ use std::{sync::{Mutex, Arc}, thread, rc::Rc};
 use std::convert::TryFrom;
 
 
-const ARRAY_SIZE:  usize = 40;
+const ARRAY_SIZE:  usize = 100000000;
 const THREAD_NUMBERS: usize = 4; 
-static mut ARRAY_INT: [i32; ARRAY_SIZE] = [0; ARRAY_SIZE];
+static mut ARRAY_INT: [f64; ARRAY_SIZE] = [0.0; ARRAY_SIZE];
 
 const ITERATIONS: usize = ARRAY_SIZE / THREAD_NUMBERS;
 
 
 lazy_static! {
-    static ref TOTAL: Arc<Mutex<i32>> =Arc::new(Mutex::new(0));
-
+    static ref TOTAL: Arc<Mutex<f64>> =Arc::new(Mutex::new(0.0));
 }
 
 fn operation(thread_id: i32){
     let start_in = (thread_id) * (i32::try_from(ITERATIONS).unwrap());
     let end_in = start_in + i32::try_from(ITERATIONS).unwrap();
 
-    let mut my_sum = 0;
+    let mut my_sum: f64 = 0.0;
 
     println!("El hilo {thread_id} va a iterar desde {start_in} hasta {end_in}");
-    for i in start_in..end_in {
-        let ii = usize::try_from(i).unwrap();
+
+    (start_in..end_in).for_each(|i|{
+        let j = usize::try_from(i).unwrap();
+        let i_f64 = f64::try_from(i).unwrap();
         unsafe{
-            ARRAY_INT[ii] = (i+1)*1;
-            my_sum = my_sum + ARRAY_INT[ii];
+            ARRAY_INT[j] = (i_f64+1.0)*1.0;
+            my_sum += f64::try_from(ARRAY_INT[j]).unwrap();
         }
-    }
+    });
 
     let counter = Arc::clone(&TOTAL);
     let mut num = counter.lock().unwrap();
